@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PulseFeed — Social Media App</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo" onclick="goHome()">PulseFeed</a>
+  <nav>
+    <button class="nav-link active" id="navHome" onclick="showView('feed')">🏠 Feed</button>
+    <button class="nav-link" id="navExplore" onclick="showView('explore')">🔍 Explore</button>
+    <div style="position:relative">
+      <button class="user-btn" onclick="toggleUserMenu()" id="userBtn">
+        <span id="userAvatar" class="mini-avatar">👤</span>
+        <span id="userLabel">Sign In</span>
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div id="dropdownLoggedIn" style="display:none">
+          <div class="dropdown-profile">
+            <div class="mini-avatar" id="dropdownAvatar">👤</div>
+            <div>
+              <div style="font-weight:600; font-size:0.9rem" id="dropdownName"></div>
+              <div style="color:var(--muted); font-size:0.78rem" id="dropdownHandle"></div>
+            </div>
+          </div>
+          <button class="dropdown-item" onclick="openMyProfile()">👤 My Profile</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" onclick="logout()">🚪 Sign Out</button>
+        </div>
+        <div id="dropdownGuest">
+          <button class="dropdown-item" onclick="openAuth('login')">🔑 Sign In</button>
+          <button class="dropdown-item" onclick="openAuth('register')">✨ Create Account</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="profile-card" id="miniProfileCard">
+      <div class="profile-card-empty" id="miniProfileEmpty">
+        <div style="font-size:2rem;margin-bottom:0.5rem">👋</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem">Sign in to post, like and follow</div>
+        <button class="btn-primary" style="width:100%;padding:0.6rem" onclick="openAuth('register')">Get Started</button>
+      </div>
+      <div id="miniProfileFull" style="display:none">
+        <div class="mini-avatar lg" id="miniAvatarLg">👤</div>
+        <div class="mini-profile-name" id="miniProfileName"></div>
+        <div class="mini-profile-handle" id="miniProfileHandle"></div>
+        <div class="mini-profile-stats">
+          <div><strong id="miniPostCount">0</strong><span>Posts</span></div>
+          <div><strong id="miniFollowerCount">0</strong><span>Followers</span></div>
+          <div><strong id="miniFollowingCount">0</strong><span>Following</span></div>
+        </div>
+        <button class="btn-secondary" style="width:100%;padding:0.5rem;margin-top:0.75rem;font-size:0.82rem" onclick="openMyProfile()">View Profile</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER FEED -->
+  <main class="feed-main">
+
+    <!-- FEED VIEW -->
+    <div id="feedView" class="view active">
+      <div class="composer" id="composer">
+        <div class="composer-locked" id="composerLocked">
+          <span style="color:var(--muted);font-size:0.9rem">Sign in to share something with the community</span>
+          <button class="btn-primary" style="padding:0.5rem 1.25rem" onclick="openAuth('login')">Sign In</button>
+        </div>
+        <div id="composerOpen" style="display:none">
+          <div style="display:flex;gap:0.75rem">
+            <div class="mini-avatar" id="composerAvatar">👤</div>
+            <textarea id="postInput" class="composer-input" placeholder="What's happening?" maxlength="280" oninput="updateCharCount()"></textarea>
+          </div>
+          <div class="composer-footer">
+            <span class="char-count" id="charCount">280</span>
+            <button class="btn-primary" style="padding:0.5rem 1.5rem" onclick="createPost()">Post</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Your Feed</div>
+      <div id="postsContainer"></div>
+    </div>
+
+    <!-- EXPLORE VIEW -->
+    <div id="exploreView" class="view">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search people or posts…" oninput="filterExplore()" id="exploreSearch"/>
+      </div>
+      <div class="section-label">All Posts</div>
+      <div id="exploreContainer"></div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div id="profileView" class="view">
+      <div class="profile-header" id="profileHeader"></div>
+      <div class="profile-tabs">
+        <button class="profile-tab active" onclick="switchProfileTab('posts')" id="tabPosts">Posts</button>
+        <button class="profile-tab" onclick="switchProfileTab('followers')" id="tabFollowers">Followers</button>
+        <button class="profile-tab" onclick="switchProfileTab('following')" id="tabFollowing">Following</button>
+      </div>
+      <div id="profilePostsContainer" class="profile-tab-content active"></div>
+      <div id="profileFollowersContainer" class="profile-tab-content"></div>
+      <div id="profileFollowingContainer" class="profile-tab-content"></div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right">
+    <div class="suggestions-card">
+      <div class="section-label" style="margin-bottom:0.75rem">Who to Follow</div>
+      <div id="suggestionsContainer"></div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- AUTH MODAL -->
+<div class="modal-backdrop" id="authModal">
+  <div class="modal">
+    <div class="modal-header" style="padding-bottom:1rem">
+      <div style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700">Welcome to PulseFeed</div>
+      <button class="close-btn" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+      <div id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPass" placeholder="Enter password"/>
+          <div class="form-error" id="loginError">Invalid email or password.</div>
+        </div>
+        <button class="btn-primary" style="width:100%;padding:0.8rem;margin-top:0.25rem" onclick="login()">Sign In</button>
+      </div>
+      <div id="registerForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="regName" placeholder="Your name"/>
+          <div class="form-error" id="regNameError">Please enter your name.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="regHandle" placeholder="username (no spaces)"/>
+          <div class="form-error" id="regHandleError">Username already taken.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="regEmail" placeholder="you@example.com"/>
+          <div class="form-error" id="regEmailError">Email already registered.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="regPass" placeholder="Min 6 characters"/>
+          <div class="form-error" id="regPassError">Password must be at least 6 characters.</div>
+        </div>
+        <button class="btn-primary" style="width:100%;padding:0.8rem;margin-top:0.25rem" onclick="register()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENTS MODAL -->
+<div class="modal-backdrop" id="commentsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700">Post</div>
+      <button class="close-btn" onclick="closeModal('commentsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="commentsPostDetail"></div>
+      <div class="comments-list" id="commentsList"></div>
+      <div class="comment-composer" id="commentComposer">
+        <div class="mini-avatar sm" id="commentAvatar">👤</div>
+        <input type="text" class="form-input" id="commentInput" placeholder="Write a comment…" onkeydown="if(event.key==='Enter')submitComment()"/>
+        <button class="btn-primary" style="padding:0.6rem 1rem" onclick="submitComment()">Reply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
