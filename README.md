@@ -6,7 +6,7 @@ A fully functional mini social media platform built with **HTML, CSS, and JavaSc
 
 ## 🔗 Live Demo
 
-> https://YOUR-USERNAME.github.io/pulsefeed/
+> https://mini-media.vercel.app/
 
 ---
 
